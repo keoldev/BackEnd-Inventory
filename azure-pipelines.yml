@@ -22,7 +22,7 @@ stages:
         vmImage: ubuntu-latest
       steps:
       - script: |
-          zip -r $(Build.ArtifactStaginDirectory)/lambda.zip . -x *.txt '*.git*' *.gitignore .yml @
+          zip -r $(Build.ArtifactStagingDirectory)/lambda.zip . -x *.txt '*.git*' *.gitignore .yml @
       - task: PublishBuildArtifacts@1
         inputs:
           PathtoPublish: '$(Build.ArtifactStagingDirectory)'
