@@ -49,6 +49,6 @@ stages:
             awsCredentials: 'aws'
             regionName: '$(REGION)'
             deploymentMode: 'codeonly'
-            functionName: 'inventory-lambda-cdk'
+            functionName: '$(BUCKET_NAME)'
             codeLocation: 'localfile'
-            localZipFile: 'lambda.zip'
+            localZipFile: '$(System.ArtifactsDirectory)/lambda/lambda.zip'
