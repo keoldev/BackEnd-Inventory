@@ -1,0 +1,54 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - azure-pipelines.yml
+
+
+stages:
+  - stage: Build
+    displayName: Build the project
+    jobs:
+    - job: Build
+      displayName: Build job
+      pool:
+        vmImage: ubuntu-latest
+      steps:
+      - script: |
+          zip -r $(Build.ArtifactStaginDirectory)/lambda.zip . -x *.txt '*.git*' *.gitignore .yml @
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: 'lambda'
+          publishLocation: 'Container'
+
+  - stage: Deployment
+    displayName: Deploy the project
+    jobs:
+      - job: Deployment
+        displayName: Deploy job
+        pool:
+
+          vmImage: ubuntu-latest
+        steps:
+        - task: DownloadBuildArtifacts@1
+          inputs:
+            buildType: 'current'
+            downloadType: 'single'
+            artifactName: 'lambda'
+            downloadPath: '$(System.ArtifactsDirectory)'
+        - task: LambdaDeployFunction@1
+          inputs:
+            awsCredentials: 'aws'
+            regionName: '$(REGION)'
+            deploymentMode: 'codeonly'
+            functionName: 'inventory-lambda-cdk'
+            codeLocation: 'localfile'
+            localZipFile: 'lambda.zip'
