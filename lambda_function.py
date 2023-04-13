@@ -29,8 +29,10 @@ def handler(event, context):
             product_name=product_data['product_name']
             description=product_data['description']
             stock=product_data['stock']
-            image=product_data['image']
-            response = insert_product(product_name, description, stock, image)
+            if 'image' in product_data: 
+                image=product_data['image']
+                response = update_product(product_id, product_name, description, stock, image)
+            else: response = update_product(product_id, product_name, description, stock)
             response_body['body'] = json.dumps(response)
             return response_body
         except Exception as e:
