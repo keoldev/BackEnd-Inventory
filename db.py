@@ -3,9 +3,11 @@ import json
 import uuid
 import os
 import base64
+import time
 
 db_client = boto3.client('dynamodb')
 s3_client = boto3.client('s3')
+cf_client = boto3.client('cloudfront')
 
 def get_products():
     response = db_client.scan(
@@ -57,6 +59,16 @@ def update_product(product_id, product_name, description, stock, image=None):
             Bucket=os.environ['BUCKET_NAME'],
             Key=f"{product_id}.jpg",
             Body=image_decoded
+        )
+        cf_client.create_invalidation(
+            DistributionId=os.environ['CLOUDFRONT_ID'],
+            InvalidationBatch={
+                'Paths': {
+                    'Quantity': 1,
+                    'Items': [f'{product_id}.jpg']
+                },
+                'CallerReference': str(time.time()).replace(".", "")
+            }
         )
     return product_id
     
