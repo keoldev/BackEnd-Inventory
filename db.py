@@ -65,7 +65,7 @@ def update_product(product_id, product_name, description, stock, image=None):
             InvalidationBatch={
                 'Paths': {
                     'Quantity': 1,
-                    'Items': [f'{product_id}.jpg']
+                    'Items': [f'/{product_id}.jpg']
                 },
                 'CallerReference': str(time.time()).replace(".", "")
             }
