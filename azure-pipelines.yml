@@ -38,17 +38,35 @@ stages:
 
           vmImage: ubuntu-latest
         steps:
+        - task: SystemsManagerGetParameter@1
+          inputs:
+            awsCredentials: 'aws'
+            regionName: '$(REGION)'
+            readMode: 'single'
+            parameterName: 'lambdaFunction'
+            singleNameTransform: 'custom'
+            customVariableName: 'LAMBDA_FUNCTION'
+          displayName: 'Getting Lambda Function name'
         - task: DownloadBuildArtifacts@1
           inputs:
             buildType: 'current'
             downloadType: 'single'
             artifactName: 'lambda'
             downloadPath: '$(System.ArtifactsDirectory)'
+        - task: S3Upload@1
+          inputs:
+            awsCredentials: 'aws'
+            regionName: '$(REGION)'
+            bucketName: 'lambda-function-inventory'
+            sourceFolder: '$(System.ArtifactsDirectory)/lambda'
+            globExpressions: '**'
+            createBucket: true
         - task: LambdaDeployFunction@1
           inputs:
             awsCredentials: 'aws'
             regionName: '$(REGION)'
             deploymentMode: 'codeonly'
-            functionName: '$(BUCKET_NAME)'
-            codeLocation: 'localfile'
-            localZipFile: '$(System.ArtifactsDirectory)/lambda/lambda.zip'
+            functionName: '$(LAMBDA_FUNCTION)'
+            codeLocation: 's3object'
+            s3Bucket: 'lambda-function-inventory'
+            s3ObjectKey: 'lambda.zip'
