@@ -34,7 +34,6 @@ def insert_product(product_name, description, stock, image):
     return product_id
 
 def update_product(product_id, product_name, description, stock, image=None):
-    image_decoded=base64.b64decode(image)
     db_client.update_item(
         TableName=os.environ['TABLE_NAME'],
         Key={
@@ -53,6 +52,7 @@ def update_product(product_id, product_name, description, stock, image=None):
         }
     )
     if image != None:
+        image_decoded=base64.b64decode(image)
         s3_client.put_object(
             Bucket=os.environ['BUCKET_NAME'],
             Key=f"{product_id}.jpg",
